@@ -1,0 +1,231 @@
+/* Default Styles */
+.home {
+  position: relative;
+  background: linear-gradient(180deg, #121a2d 0%, #234352 52.6%, #1f3b49 100%);
+  height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+}
+
+.container {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  height: 93%;
+  transition: margin-left 0.3s ease, width 0.3s ease;
+  position: fixed;
+  left: 13%;
+  top: 4%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.container-heading {
+  margin-top: 5%;
+}
+
+.container-header1 {
+  color: #141414;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 100%;
+}
+
+.container-header2 {
+  color: #141414;
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 100%;
+  text-align: center;
+}
+
+.container-header3 {
+  color: #000;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: normal;
+  padding-top: 20px;
+  text-align: center;
+}
+
+.home-icon{
+  width:32px;
+  height:32px;
+}
+
+/* Icons, Titles, and Cards */
+.icons-titles-and-cards {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  margin-top: 20px;
+  width: 100%;
+  flex-direction: row;
+  padding:10px;
+}
+
+.icon-title-and-cards {
+  width: 48%; 
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.icon-and-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.icon-and-title svg {
+  font-size: 24px;
+}
+
+h3 {
+  color: #000;
+  text-align: center;
+  font-family: "Nunito Sans",sans-serif;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+/* Cards in a Single Row */
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 20px;
+  width: 85%;
+}
+
+.card {
+  width: 100%;
+  height: 75px;
+  padding: 10px;
+  border: none;
+  margin-bottom: 10px;
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+background: #F8EFEF;
+}
+
+.card p {
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: center;
+  
+  font-family: "Nunito Sans",sans-serif;
+}
+
+/* Search bar */
+.container-search-bar {
+  width: 95%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  border: 1px solid #f0a160;
+  background: #fff;
+  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.container-search-bar input {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  width: 50%;
+  height: 30px;
+  outline: none;
+  font-size: 12px;
+}
+
+.container-search-icon {
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 28px;
+  color: #ca4454;
+}
+
+.star-image {
+  position: absolute;
+  display: flex;
+  margin-left: 10%;
+  /* top: 50%; */
+  /* left: 50%; */
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  
+  left: 22%;
+  top:7%;
+}
+
+
+
+.fallingStar-image{
+  left:57%;
+  top:10%;
+  
+  position: absolute;
+  display: flex;
+  margin-left: 10%;
+  /* top: 50%; */
+  /* left: 50%; */
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+}
+
+
+
+/* Media query for responsiveness */
+@media (max-width: 1200px) {
+  .container {
+    margin-left: 25%;
+    width: 75%;
+  }
+}
+
+@media (max-width: 992px) {
+  .container {
+    margin-left: 30%;
+    width: 70%;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    margin-left: 40%;
+    width: 60%;
+  }
+}
+
+@media (max-width: 576px) {
+  .container {
+    margin-left: 50%;
+    width: 50%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    margin-left: 40%;
+    width: 60%;
+  }
+}

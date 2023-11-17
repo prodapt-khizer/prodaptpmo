@@ -1,0 +1,13 @@
+/* OpenAIResponse.css */
+.response-container {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+  }
+  
+  pre {
+    white-space: pre-wrap;
+  }
+  
