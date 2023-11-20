@@ -1,0 +1,59 @@
+{
+  "chats": [
+    {
+      "title": "Yesterday",
+      "id": 1,
+      "messages": [
+        {
+          "id": 101,
+          "sender": "User",
+          "message": "Risk Mitigated  deal sheet",
+          "timestamp": "2023-11-09T15:30:00Z"
+        },
+        {
+          "id": 102,
+          "sender": "Chatbot",
+          "message": "Database Project deal sheet",
+          "timestamp": "2023-11-09T15:32:00Z"
+        }
+      ]
+      
+    },
+    {
+      "title": "Previous 7 Days",
+      "id": 2,
+      "messages": [
+        {
+          "id": 201,
+          "sender": "User",
+          "message": "I have a question about your services.",
+          "timestamp": "2023-11-10T12:35:00Z"
+        },
+        {
+          "id": 202,
+          "sender": "Chatbot",
+          "message": "Financing Arrangements?",
+          "timestamp": "2023-11-10T12:38:00Z"
+        }
+      ]
+    },
+    {
+      "title": "Last Month",
+      "id": 3,
+      "messages": [
+        {
+          "id": 301,
+          "sender": "User",
+          "message": "Performance indicators deal",
+          "timestamp": "2023-10-15T11:55:00Z"
+        },
+        {
+          "id": 302,
+          "sender": "Chatbot",
+          "message": "Deal Milestones deal sheet",
+          "timestamp": "2023-10-15T12:05:00Z"
+        }
+      ]
+    }
+  ]
+}

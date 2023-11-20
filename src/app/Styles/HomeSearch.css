@@ -1,0 +1,178 @@
+
+.chat-header{
+    display: flex;
+    font-size: 12px;
+    align-items: center;
+    padding-bottom: 6px;
+    border-bottom:1px solid #666;
+    text-align: left;
+    font-style: normal;
+   
+font-weight: 500;
+   
+}
+.chat-header p{
+    margin-left: 12px;
+}
+.circle-letter{
+    width: 30px;
+    height: 30px;
+   border-radius: 50%;
+ 
+    background-color: #7702A1;
+    display: flex;
+    justify-content: center;
+   
+    align-items: center;
+    color: #fff;
+}
+ 
+/*
+Deal container */
+ 
+.deal-container{
+    background-color:  #F3F4F8;
+    overflow: auto;
+}
+.deal-header{
+    color: #333;
+    display: flex;
+    /* margin-top: 10px; */
+    padding: 10px;
+font-size: 12px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+
+}
+ 
+.costing{
+    width: 30%;
+    margin: 10px;
+    border: 1px solid #ffff;
+    border-radius: 10px;
+    background-color: #ffff;
+}
+.costing-header{
+    text-align: left;
+    color: #333;
+font-size: 10px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+padding-left: 10px;
+padding-top: 10px;
+}
+.maincost-content{
+    margin:10px;
+}
+.left-contents{
+    text-align: left;
+    color: #333;
+font-size: 11px;
+font-style: normal;
+font-weight: 300;
+line-height: normal;
+}
+.left-contents p{
+    padding-bottom: 5px;
+}
+ 
+/* tablecosting */
+ 
+.table-costing{
+    width :70%;
+   
+    margin: 10px;
+    border: 1px solid #ffff;
+    border-radius: 10px;
+    background-color: #ffff;
+}
+.FTE-header{
+    color: #333;
+font-size: 10px;
+text-align: left;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+padding-left: 10px;
+padding-top: 10px;
+}
+.FTE-header2{
+    color: #333;
+font-size: 8px;
+text-align: left;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+padding-left: 10px;
+ 
+ 
+}
+table, th, td {
+    border-right: 1px solid #EBF0F4;
+    text-align: left;
+    width:100%;
+    padding: 5px;
+ 
+  }
+ 
+  thead{
+    background-color: #EBF0F4;
+    padding: 5px;
+ 
+  }
+  th{
+   
+    color: #333;
+    padding: 5px;
+ 
+font-size: 12px;
+font-style: normal;
+font-weight: 300;
+line-height: normal;
+ 
+  }
+  td{
+    color: #333;
+    padding: 5px;
+ 
+font-size: 10px;
+font-style: normal;
+font-weight: 300;
+line-height: normal;
+  }
+ 
+ 
+ 
+  .deal-table{
+   height: 200px;
+   width:100%;
+  overflow: auto;
+  }
+ 
+  .bottom-table::-webkit-scrollbar-track,
+  .deal-container::-webkit-scrollbar-track
+  {
+      -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+      border-radius: 3px;
+      background-color: #F5F5F5;
+  }
+ 
+  .bottom-table::-webkit-scrollbar,
+  .deal-container::-webkit-scrollbar
+  {
+      width: 2px;
+      height:2px;
+      background-color: #F5F5F5;
+  }
+ 
+   .bottom-table::-webkit-scrollbar-thumb,
+   .deal-container::-webkit-scrollbar-thumb
+  {
+      border-radius: 3px;
+      -webkit-box-shadow: inset 0 0 6px rgba(110, 108, 108, 0.3);
+      background-color: #868585;
+  }
+ 
+ 
