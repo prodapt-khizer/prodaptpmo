@@ -13,8 +13,10 @@ import Logo from "./Logo";
 import Home from "./Home";
 
 import HomeSearch from "./HomeSearch";
+import Loader from "@/app/(components)/Loader";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 const DualSidebar = () => {
   const [isLeftSidebarCollapsed, setLeftSidebarCollapsed] = useState(true);
@@ -22,24 +24,93 @@ const DualSidebar = () => {
   const [isHomeActive, setHomeActive] = useState(true);
   const [isCompassActive, setCompassActive] = useState(false);
   const [isSettingsActive, setSettingsActive] = useState(false);
-  const [dataLoaded, setDataLoaded] = useState(false);
+  const [websocket, setWebsocket] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [allTitles, setAllTitles] = useState([]);
   const [title, setTitle] = useState("");
+  const [titleText, setTitleText] = useState("");
+  const [allTitles, setAllTitles] = useState([]);
   const [generating, setGenerating] = useState(false);
+  const [qn, setQn] = useState("");
+  const [ans, setAns] = useState("");
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  useEffect(() => {
+    if (websocket) {
+      // WebSocket connection already established
+      return;
+    }
+
+    const uri = "ws://localhost:8765";
+    const ws = new W3CWebSocket(uri);
+
+    ws.onopen = () => {
+      console.log('Connected to server. Start chatting! Type "quit" to exit.');
+      setWebsocket(ws);
+    };
+
+    ws.onmessage = (event) => {
+      console.log(`Received: ${event.data}`);
+      setAns(event.data);
+    };
+
+    ws.onclose = () => {
+      console.log("Connection closed.");
+      setWebsocket(null); // Reset WebSocket state when connection is closed
+    };
+
+    return () => {
+      if (websocket) {
+        websocket.close();
+        setWebsocket(null); // Reset WebSocket state when component unmounts
+      }
+    };
+  }, [websocket]);
+  const getOneMessage = (data) => {
+    axios
+    .get("/api/messages/" + encodeURIComponent(data),{
+      timeout: 50000
+    })
+    .then((res) => {
+      setMessages(res.data.messages);
+      setTitle(data);
+      getMessages();
+    })
+    .catch((error) => {
+      console.log("error ", error);
+    });
+  };
+  const sendMessage = (message) => {
+    if (
+      websocket &&
+      websocket.readyState === WebSocket.OPEN &&
+      message[message.length - 1].trim() !== ""
+    ) {
+      websocket.send(message);
+      if (message[message.length - 1].toLowerCase() === "quit") {
+        websocket.close();
+      }
+    }
+  };
 
   const toggleLeftSidebar = () => {
     setLeftSidebarCollapsed(!isLeftSidebarCollapsed);
   };
   useEffect(() => {
-    getMessages()
+    getMessages();
   }, []);
   const handleItemClick = (itemName) => {
     setHomeActive(itemName === "home");
     setCompassActive(itemName === "compass");
     setSettingsActive(itemName === "settings");
   };
-
+  const getMessages = () => {
+    axios.get("/api/messages",{
+      timeout: 5000
+    }).then((res) => {
+      setAllTitles([...new Set(res.data.messages.map((obj) => obj.title))]);
+      setDataLoaded(true);
+    });
+  };
   const goToHome = () => {
     router.push("/");
   };
@@ -48,224 +119,257 @@ const DualSidebar = () => {
     router.push("/side");
   };
   const handleSearchInitiation = () => {};
-  const getMessages = () => {
-    axios.get("/api/messages").then((res) => {
-      setAllTitles([...new Set(res.data.messages.map((obj) => obj.title))]);
-      setDataLoaded(true);
-    });
-  };
-  const getOneMessage = (data) => {
-    axios.get("/api/messages/" + encodeURIComponent(data)).then((res) => {
-      setMessages(res.data.messages);
-      setTitle(data)
-    }).catch((error)=>{
-      console.log("error ",error);
-    })
-  }
-  const callOpenAi = (data) => {
+
+  const callOpenAi = (ti, data) => {
     setGenerating(true);
-    axios.get("http://127.0.0.1:9001/qa?prompt=" + data).then((ress) => {
+    console.log("test form side ", data);
+    setQn(ti);
+    setTitleText(ti);
+    if (title === "") {
+      sendMessage([data]);
+    } else {
+      sendMessage([...messages[0].prompt, data]);
+    }
+  };
+  useEffect(() => {
+    if (qn != "" && ans != "") {
       if (title === "") {
+        console.log("test from page ", qn, title);
         axios.post("api/messages", {
-          title: data,
-          prompt: [data],
-          response: [ress.data],
+          title: qn,
+          prompt: [qn],
+          response: [ans],
           user: "Khizer Hussain",
           edited: false,
         });
-        getOneMessage(data);
-        setTitle(data);
-        getMessages();
+        getOneMessage(qn);
+        // getMessages();
         setGenerating(false);
       } else {
-        axios.get("/api/messages/" + encodeURIComponent(title)).then(res => res.data.messages[0]).then((res) => {
-          axios.put("/api/messages/" + res._id, {
-            title: res.title,
-            prompt: [...res.prompt,data],
-            response: [...res.response, ress.data],
-            user: "Khizer Hussain",
-            edited: false,
+        axios
+          .get("/api/messages/" + encodeURIComponent(title))
+          .then((res) => res.data.messages[0])
+          .then((res) => {
+            axios.put("/api/messages/" + res._id, {
+              title: res.title,
+              prompt: [...res.prompt, qn],
+              response: [...res.response, ans],
+              user: "Khizer Hussain",
+              edited: false,
+            });
           });
-        });
         getOneMessage(title);
-        getMessages();
+        // getMessages();
         setGenerating(false);
       }
-      // setMessages((prev) => {
-        //   [
-        //     ...prev,
-      //     {
-      //       title: data,
-      //       prompt: [data],
-      //       response: [res.data.resp_1],
-      //       user: "Khizer Hussain",
-      //       edited: false,
-      //     },
-      //   ];
-      // });
-    });
-  };
+      setMessages((prevData) => {
+        const lastIndex = prevData.length > 1 ? prevData.length - 1 : 0;
+        const updatedData = [...prevData];
+        updatedData[lastIndex] = {
+          ...updatedData[lastIndex],
+          title: updatedData[lastIndex]?.title || titleText,
+          _id: "",
+          user: updatedData[lastIndex]?.user || "Khizer Hussain",
+          edited: updatedData[lastIndex]?.edited || false,
+          prompt: updatedData[lastIndex]?.prompt ? [...updatedData[lastIndex]?.prompt, qn]: [qn],
+          response: updatedData[lastIndex]?.response ? [...updatedData[lastIndex]?.response, ans] : [ans],
+        };
+        return updatedData;
+      });
+      // setMessages((prev) => [
+      //   {
+      //     title: titleText,
+      //     _id: "",
+      //     user: "Khizer Hussain",
+      //     edited: false,
+      //     prompt: [...prev[0]?.prompt, qn],
+      //     response: [...prev[0]?.response, ans],
+      //   },
+      // ]);
+    }
+  }, [qn, ans]);
+  useEffect(() => {
+    console.log("title ", title);
+  }, [title]);
+  useEffect(() => {
+    console.log("messages ", messages);
+  }, [messages]);
   const newChat = () => {
     setMessages([]);
-    setDataLoaded(false);
     setTitle("");
+    setTitleText("");
+    sendMessage(["quit"]);
   };
+  if (dataLoaded) {
+    return (
+      <>
+        <div className="dual-sidebar">
+          {/* Left Sidebar */}
+          <div
+            className={`sidebar ${isLeftSidebarCollapsed ? "collapsed" : ""}`}
+          >
+            <div className="content">
+              <Logo isCollapsed={isLeftSidebarCollapsed} />
 
-  return (
-    <>
-      <div className="dual-sidebar">
-        {/* Left Sidebar */}
-        <div className={`sidebar ${isLeftSidebarCollapsed ? "collapsed" : ""}`}>
-          <div className="content">
-            <Logo isCollapsed={isLeftSidebarCollapsed} />
-
-            <div className="menu-item-container">
-              {/* Home */}
-              <div
-                className={`sidebar-item ${isHomeActive ? "active" : ""}`}
-                onClick={() => {
-                  handleItemClick("home");
-                  goToHome();
-                }}
-              >
-                <div className="sidebar-item-content">
-                  <div className="sidebar-item-box">
-                    <RiHome6Fill size={18} />
+              <div className="menu-item-container">
+                {/* Home */}
+                <div
+                  className={`sidebar-item ${isHomeActive ? "active" : ""}`}
+                  onClick={() => {
+                    handleItemClick("home");
+                    goToHome();
+                  }}
+                >
+                  <div className="sidebar-item-content">
+                    <div className="sidebar-item-box">
+                      <RiHome6Fill size={18} />
+                    </div>
+                    <span
+                      style={{
+                        display: isLeftSidebarCollapsed
+                          ? "none"
+                          : "inline-block",
+                        fontSize: "12px",
+                      }}
+                    >
+                      Home
+                    </span>
                   </div>
-                  <span
-                    style={{
-                      display: isLeftSidebarCollapsed ? "none" : "inline-block",
-                      fontSize: "12px",
-                    }}
-                  >
-                    Home
-                  </span>
                 </div>
-              </div>
 
-              {/* Compass */}
-              <div
-                className={`sidebar-item ${isCompassActive ? "active" : ""}`}
-                onClick={() => {
-                  handleItemClick("compass");
-                  goToComp();
-                }}
-              >
-                <div className="sidebar-item-content">
-                  <div className="sidebar-item-box">
-                    <LuCompass size={18} />
+                {/* Compass */}
+                <div
+                  className={`sidebar-item ${isCompassActive ? "active" : ""}`}
+                  onClick={() => {
+                    handleItemClick("compass");
+                    goToComp();
+                  }}
+                >
+                  <div className="sidebar-item-content">
+                    <div className="sidebar-item-box">
+                      <LuCompass size={18} />
+                    </div>
+                    <span
+                      style={{
+                        display: isLeftSidebarCollapsed
+                          ? "none"
+                          : "inline-block",
+                        fontSize: "12px",
+                      }}
+                    >
+                      Compass
+                    </span>
                   </div>
-                  <span
-                    style={{
-                      display: isLeftSidebarCollapsed ? "none" : "inline-block",
-                      fontSize: "12px",
-                    }}
-                  >
-                    Compass
-                  </span>
                 </div>
-              </div>
 
-              {/* Settings */}
-              <div
-                className={`sidebar-item ${isSettingsActive ? "active" : ""}`}
-                onClick={() => handleItemClick("settings")}
-              >
-                <div className="sidebar-item-content">
-                  <div className="sidebar-item-box">
-                    <RiSettings3Line size={18} />
+                {/* Settings */}
+                <div
+                  className={`sidebar-item ${isSettingsActive ? "active" : ""}`}
+                  onClick={() => handleItemClick("settings")}
+                >
+                  <div className="sidebar-item-content">
+                    <div className="sidebar-item-box">
+                      <RiSettings3Line size={18} />
+                    </div>
+                    <span
+                      style={{
+                        display: isLeftSidebarCollapsed
+                          ? "none"
+                          : "inline-block",
+                        fontSize: "12px",
+                      }}
+                    >
+                      Settings
+                    </span>
                   </div>
-                  <span
-                    style={{
-                      display: isLeftSidebarCollapsed ? "none" : "inline-block",
-                      fontSize: "12px",
-                    }}
-                  >
-                    Settings
-                  </span>
                 </div>
               </div>
             </div>
+            <div className="toggle-btn-container" onClick={toggleLeftSidebar}>
+              {isLeftSidebarCollapsed ? <BsChevronRight /> : <BsChevronLeft />}
+            </div>
           </div>
-          <div className="toggle-btn-container" onClick={toggleLeftSidebar}>
-            {isLeftSidebarCollapsed ? <BsChevronRight /> : <BsChevronLeft />}
-          </div>
-        </div>
 
-        {/* Separator Line */}
-        <div
-          className={`separator-line ${
-            isLeftSidebarCollapsed ? "collapsed" : ""
-          }`}
-        />
+          {/* Separator Line */}
+          <div
+            className={`separator-line ${
+              isLeftSidebarCollapsed ? "collapsed" : ""
+            }`}
+          />
 
-        {/* Right Sidebar */}
-        <div
-          className={`right-sidebar ${
-            isLeftSidebarCollapsed ? "collapsed" : ""
-          }`}
-        >
-          <div className="content">
-            {/* Chatbot Contents */}
-            <span className="activity-text">Activity</span>
-            <div className="history_handler">
-              <div className="chatbot-contents">
-                <div className="search-bar">
-                  <input type="text" placeholder="Search..." />
-                  <FiSearch size={12} />
-                </div>
-
-                {/* Chat Categories */}
-                {/* <div className="chat-categories">
-                {chatData.chats.map((chatCategory) => (
-                  <div key={chatCategory.id} className="chat-category">
-                    <span className="category-title">{chatCategory.title}</span>
-                    {chatCategory.messages.map((message) => (
-                      <div key={message.id} className="chat-subcategory">
-                        <div className="chatbot-item">
-                          <FiBookmark size={18} />
-                          <span>{message.message.substring(0, 30)}</span>
-                        </div>
-                      </div>
-                    ))}
+          {/* Right Sidebar */}
+          <div
+            className={`right-sidebar ${
+              isLeftSidebarCollapsed ? "collapsed" : ""
+            }`}
+          >
+            <div className="content">
+              {/* Chatbot Contents */}
+              <span className="activity-text">Activity</span>
+              <div className="history_handler">
+                <div className="chatbot-contents">
+                  <div className="search-bar">
+                    <input type="text" placeholder="Search..." />
+                    <FiSearch size={12} />
                   </div>
-                ))}
-              </div> */}
-                <div className="chat-categories">
-                  {allTitles.map((data,i) => {
-                    return (
-                      <div key={i} className="chat-category">
-                        <div key={i} className="chat-subcategory">
-                          <div className="chatbot-item" onClick={()=> getOneMessage(data)}>
+
+                  {/* Chat Categories */}
+                  {/* <div className="chat-categories">
+                  {chatData.chats.map((chatCategory) => (
+                    <div key={chatCategory.id} className="chat-category">
+                      <span className="category-title">{chatCategory.title}</span>
+                      {chatCategory.messages.map((message) => (
+                        <div key={message.id} className="chat-subcategory">
+                          <div className="chatbot-item">
                             <FiBookmark size={18} />
-                            <span>{data.substring(0, 30)}</span>
+                            <span>{message.message.substring(0, 30)}</span>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      ))}
+                    </div>
+                  ))}
+                </div> */}
+                  <div className="chat-categories">
+                    {allTitles.map((data, i) => {
+                      return (
+                        <div key={i} className="chat-category">
+                          <div key={i} className="chat-subcategory">
+                            <div
+                              className="chatbot-item"
+                              onClick={() => getOneMessage(data)}
+                            >
+                              <FiBookmark size={18} />
+                              <span>{data.substring(0, 30)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
 
-              {/* New Chat Button */}
-              <button className="new-chat-btn" onClick={newChat}>
-                <AiOutlinePlus size={20} />
-                <span>New Chat</span>
-              </button>
+                {/* New Chat Button */}
+                <button className="new-chat-btn" onClick={newChat}>
+                  <AiOutlinePlus size={20} />
+                  <span>New Chat</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <Home
-        isLeftSidebarCollapsed={isLeftSidebarCollapsed}
-        onSearchInitiation={handleSearchInitiation}
-        submitPrompt={callOpenAi}
-        messages={messages}
-        searching={generating}
-      />
-    </>
-  );
+        <Home
+          isLeftSidebarCollapsed={isLeftSidebarCollapsed}
+          onSearchInitiation={handleSearchInitiation}
+          submitPrompt={callOpenAi}
+          messages={messages}
+          searching={generating}
+          setLoading={setDataLoaded}
+        />
+      </>
+    );
+  } else {
+    return <Loader />;
+  }
 };
 
 export default DualSidebar;
