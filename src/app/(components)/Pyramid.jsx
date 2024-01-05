@@ -2,12 +2,13 @@
 import React, { Component } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import Funnel from 'highcharts/modules/funnel';
 import addFunnel from 'highcharts/modules/funnel';
 import '../Styles/Pyramid.css'
 
 // Initialize the funnel module
 addFunnel(Highcharts);
- 
+Funnel(Highcharts);
 class FunnelChart extends Component {
   constructor(props) {
     super(props);

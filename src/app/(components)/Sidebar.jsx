@@ -33,6 +33,7 @@ const DualSidebar = () => {
   const [qn, setQn] = useState("");
   const [ans, setAns] = useState("");
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [objectID, setObjectID] = useState("");
 
   useEffect(() => {
     if (websocket) {
@@ -40,7 +41,7 @@ const DualSidebar = () => {
       return;
     }
 
-    const uri = "ws://localhost:8765";
+    const uri = "ws://34.67.160.218:8765/";
     const ws = new W3CWebSocket(uri);
 
     ws.onopen = () => {
@@ -74,6 +75,8 @@ const DualSidebar = () => {
       setMessages(res.data.messages);
       setTitle(data);
       getMessages();
+      setQn("");
+      setAns("");
     })
     .catch((error) => {
       console.log("error ", error);
@@ -98,6 +101,9 @@ const DualSidebar = () => {
   useEffect(() => {
     getMessages();
   }, []);
+  useEffect(()=>{
+    console.log(allTitles);
+  },[allTitles])
   const handleItemClick = (itemName) => {
     setHomeActive(itemName === "home");
     setCompassActive(itemName === "compass");
@@ -107,7 +113,7 @@ const DualSidebar = () => {
     axios.get("/api/messages",{
       timeout: 5000
     }).then((res) => {
-      setAllTitles([...new Set(res.data.messages.map((obj) => obj.title))]);
+      setAllTitles(res.data.messages);
       setDataLoaded(true);
     });
   };
@@ -121,61 +127,75 @@ const DualSidebar = () => {
   const handleSearchInitiation = () => {};
 
   const callOpenAi = (ti, data) => {
-    setGenerating(true);
-    console.log("test form side ", data);
-    setQn(ti);
-    setTitleText(ti);
-    if (title === "") {
-      sendMessage([data]);
-    } else {
-      sendMessage([...messages[0].prompt, data]);
-    }
+    console.log(ti,"data ", data);
+    axios.post("api/messages", {
+      title: "",
+      prompt: [],
+      response: [],
+      user: "Khizer Hussain",
+      edited: false,
+    }).then((res)=>{
+      setGenerating(true);
+      setQn(data);
+      setTitleText(ti);
+      sendMessage(res.data.response._id);
+      sendMessage(data);
+      setObjectID(res.data.response._id)
+    })
+    
+    // if (title === "") {
+    // } else {
+    //   sendMessage([...messages[0].prompt, data]);
+    // }
   };
   useEffect(() => {
+    if(objectID !== ""){
+      getOneMessage(objectID);
+    }
     if (qn != "" && ans != "") {
-      if (title === "") {
-        console.log("test from page ", qn, title);
-        axios.post("api/messages", {
-          title: qn,
-          prompt: [qn],
-          response: [ans],
-          user: "Khizer Hussain",
-          edited: false,
-        });
-        getOneMessage(qn);
-        // getMessages();
-        setGenerating(false);
-      } else {
+      // if (title === "") {
+      //   console.log("test from page ", qn, title);
+      //   axios.post("api/messages", {
+      //     title: titleText,
+      //     prompt: [qn],
+      //     response: [ans],
+      //     user: "Khizer Hussain",
+      //     edited: false,
+      //   });
+      //   getOneMessage(qn);
+      //   // getMessages();
+      //   setGenerating(false);
+      // } else {
         axios
-          .get("/api/messages/" + encodeURIComponent(title))
+          .get("/api/messages/" + encodeURIComponent(objectID))
           .then((res) => res.data.messages[0])
           .then((res) => {
             axios.put("/api/messages/" + res._id, {
-              title: res.title,
+              title: titleText || res.title,
               prompt: [...res.prompt, qn],
               response: [...res.response, ans],
               user: "Khizer Hussain",
               edited: false,
             });
           });
-        getOneMessage(title);
+        getOneMessage(objectID);
         // getMessages();
         setGenerating(false);
-      }
-      setMessages((prevData) => {
-        const lastIndex = prevData.length > 1 ? prevData.length - 1 : 0;
-        const updatedData = [...prevData];
-        updatedData[lastIndex] = {
-          ...updatedData[lastIndex],
-          title: updatedData[lastIndex]?.title || titleText,
-          _id: "",
-          user: updatedData[lastIndex]?.user || "Khizer Hussain",
-          edited: updatedData[lastIndex]?.edited || false,
-          prompt: updatedData[lastIndex]?.prompt ? [...updatedData[lastIndex]?.prompt, qn]: [qn],
-          response: updatedData[lastIndex]?.response ? [...updatedData[lastIndex]?.response, ans] : [ans],
-        };
-        return updatedData;
-      });
+      // }
+      // setMessages((prevData) => {
+      //   const lastIndex = prevData.length > 1 ? prevData.length - 1 : 0;
+      //   const updatedData = [...prevData];
+      //   updatedData[lastIndex] = {
+      //     ...updatedData[lastIndex],
+      //     title: updatedData[lastIndex]?.title || titleText,
+      //     _id: "",
+      //     user: updatedData[lastIndex]?.user || "Khizer Hussain",
+      //     edited: updatedData[lastIndex]?.edited || false,
+      //     prompt: updatedData[lastIndex]?.prompt ? [...updatedData[lastIndex]?.prompt, qn]: [qn],
+      //     response: updatedData[lastIndex]?.response ? [...updatedData[lastIndex]?.response, ans] : [ans],
+      //   };
+      //   return updatedData;
+      // });
       // setMessages((prev) => [
       //   {
       //     title: titleText,
@@ -187,7 +207,7 @@ const DualSidebar = () => {
       //   },
       // ]);
     }
-  }, [qn, ans]);
+  }, [ans]);
   useEffect(() => {
     console.log("title ", title);
   }, [title]);
@@ -336,10 +356,10 @@ const DualSidebar = () => {
                           <div key={i} className="chat-subcategory">
                             <div
                               className="chatbot-item"
-                              onClick={() => getOneMessage(data)}
+                              onClick={() => getOneMessage(data._id)}
                             >
                               <FiBookmark size={18} />
-                              <span>{data.substring(0, 30)}</span>
+                              <span>{data.title.substring(0, 30)}</span>
                             </div>
                           </div>
                         </div>

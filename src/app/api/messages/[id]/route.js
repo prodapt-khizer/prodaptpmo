@@ -3,7 +3,7 @@ import Messages from "@/app/(models)/messages";
 
 export async function GET(request, { params }) {
   const { id } = params;
-    const messages = await Messages.find({ title: id });
+    const messages = await Messages.find({ _id: id });
     return NextResponse.json({ messages }, { status: 200 });
 }
 

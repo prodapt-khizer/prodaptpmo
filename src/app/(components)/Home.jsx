@@ -28,6 +28,7 @@ const Home = ({
 }) => {
   const [searched, setSearched] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [searchTitle, setSearchTitle] = useState("");
   const [searchTempText, setSearchTempText] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [allSuggestions, setAllSuggestions] = useState([]);
@@ -51,6 +52,38 @@ const Home = ({
       setPromptLoaded(true);
     });
   };
+  const filterAndSortData = (data) => {
+    // Step 1: Group by prompt_category
+    const groupedData = data.reduce((groups, item) => {
+      const key = item.prompt_category;
+      (groups[key] || (groups[key] = [])).push(item);
+      return groups;
+    }, {});
+  
+    // Step 2: Sort the groups based on the sum of hit_count in descending order
+    const sortedGroups = Object.entries(groupedData).sort(
+      ([, groupA], [, groupB]) =>
+        groupB.reduce((sum, item) => sum + item.hit_count, 0) -
+        groupA.reduce((sum, item) => sum + item.hit_count, 0)
+    );
+  
+    // Step 3: Filter each group to store only two items with max hit_count
+    const formattedData = sortedGroups.slice(0, 4).map(([category, group]) => ({
+      category,
+      data: group
+        .sort((a, b) => b.hit_count - a.hit_count)
+        .slice(0, 2) // Take only two items with max hit_count
+        .map(({ _id, prompt_title, prompt_category, prompt_value, hit_count }) => ({
+          _id,
+          prompt_title,
+          prompt_category,
+          prompt_value,
+          hit_count,
+        }))
+    }));
+  
+    return formattedData;
+  }
   useEffect(() => {
     calculateRows();
   }, [searchText]);
@@ -66,10 +99,16 @@ const Home = ({
     // Select the first four categories
     return shuffledCategories.slice(0, 4);
   };
-
+  const updateCount = (data) => {
+    axios.put("/api/prompts/" + data._id, {
+      hit_count: data.hit_count+1,
+    });
+  };
   const getRandomValuesForCategory = (category) => {
     // Get values for the specified category
-    const values = allSuggestions.filter((item) => item.prompt_category === category);
+    const values = allSuggestions.filter(
+      (item) => item.prompt_category === category
+    );
 
     // Shuffle the values
     const shuffledValues = values.sort(() => Math.random() - 0.5);
@@ -81,7 +120,7 @@ const Home = ({
     if (sentence.length <= 100) {
       return sentence;
     }
-  
+
     const truncatedSentence = sentence.substring(0, 100).trim();
     return `${truncatedSentence}...`;
   };
@@ -116,7 +155,7 @@ const Home = ({
   ];
 
   const handleSearch = () => {
-    submitPrompt(searchText, searchText);
+    submitPrompt(searchTitle, searchText);
     setSearchTempText(searchText);
     setSearchText("");
   };
@@ -218,21 +257,27 @@ const Home = ({
                   ))}
                 </div>
               )) : <Loader />} */}
-              {selectedCategories.map((category,i) => (
+              {filterAndSortData(allSuggestions).map((category, i) => (
                 <div className="icon-title-and-cards" key={category}>
                   <div className="icon-and-title">
-                  {icons[i]}
-                    <h3>{category}</h3>
+                    {icons[i]}
+                    <h3>{category.category}</h3>
                   </div>
-                  {getRandomValuesForCategory(category).map((value) => (
-                    <div className="card" onClick={()=>{
-                      setSearchText(value.prompt_value);
-                    }} key={value._id}>
+                  {category.data.map((value) => (
+                    <div
+                      className="card"
+                      onClick={() => {
+                        setSearchText(value.prompt_value);
+                        setSearchTitle(value.prompt_title);
+                        updateCount(value);
+                      }}
+                      key={value._id}
+                    >
                       {truncateSentence(value.prompt_value)}
                     </div>
                   ))}
                 </div>
-              )) }
+              ))}
             </div>
           </>
         )}
@@ -272,11 +317,13 @@ const Home = ({
                       // setSearchTempText(suggestion.prompt_value);
 
                       setSearchText(suggestion.prompt_value);
+                      setSearchTitle(suggestion.prompt_title);
+                      updateCount(suggestion._id);
                       setSuggestions([]);
                       // setLineCount(calculateRows());
                     }}
                   >
-                    {suggestion.prompt_value}
+                    {suggestion.prompt_title}
                     {/* <span style={{
                       fontSize : '12px',
                       opacity: 0.5,
@@ -293,13 +340,14 @@ const Home = ({
             id="searchTextArea"
             onChange={(e) => {
               setSearchText(e.target.value);
-                setSuggestions(() => {
-                  return allSuggestions.filter((fil) =>
-                    fil?.prompt_value
-                      ?.toLowerCase()
-                      .includes(e.target.value.toLowerCase())
-                  );
-                });
+              setSearchTitle(e.target.value);
+              setSuggestions(() => {
+                return allSuggestions.filter((fil) =>
+                  fil?.prompt_title
+                    ?.toLowerCase()
+                    .includes(e.target.value.toLowerCase())
+                );
+              });
             }}
             value={searchText}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
