@@ -254,6 +254,8 @@ font-family: "Poppins",sans-serif;
 .chat-categories {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  overflow: auto;
 }
 
 /* Chat Category */

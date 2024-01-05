@@ -1,22 +1,21 @@
-"use client"
+// Assuming you're using 'websocket' library, make sure to install it with `npm install websocket` if you haven't already
+
+"use client";
 import Sidebar from "@/app/(components)/Sidebar";
+import Login from "@/app/(components)/Login"
 import axios from "axios";
-import { useEffect } from "react";
-// const getMessages = async () =>{
-//   try {
-//     const res = await fetch("/api/messages");
-    
-//     return res.json();
-//   } catch (error) {
-//     console.log("Error while fetching", error)
-//   }
-//  }
+import { useEffect, useState } from "react";
+import { w3cwebsocket as W3CWebSocket } from 'websocket';
+
+
 export default function Home() {
-  // const {messages} = await getMessages();
+  
+
   return (
     <main>
-      {/* <Sidebar messages={messages[0]} /> */}
       <Sidebar />
+      {/* <Login/> */}
+
     </main>
-  )
+  );
 }

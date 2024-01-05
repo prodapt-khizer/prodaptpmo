@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import Messages from "@/app/(models)/messages";
+import Prompts from "../../../(models)/prompts";
 
 export async function GET(request, { params }) {
   const { id } = params;
-    const messages = await Messages.find({ _id: id });
-    return NextResponse.json({ messages }, { status: 200 });
+    const prompts = await Prompts.find({ title: id });
+    return NextResponse.json({ prompts }, { status: 200 });
 }
 
 export async function PUT(req, { params }) {
@@ -12,13 +12,13 @@ export async function PUT(req, { params }) {
     const { id } = params;
 
     const body = await req.json();
-    const messgaeData = body;
+    const promptData = body;
 
-    const updateMessageData = await Messages.findByIdAndUpdate(id, {
-      ...messgaeData,
+    const updatePromptData = await Prompts.findByIdAndUpdate(id, {
+      ...promptData,
     });
 
-    return NextResponse.json({ message: "Message updated", updatedMessage: updateMessageData }, { status: 200 });
+    return NextResponse.json({ message: "Message updated", updatedPrompt: updatePromptData }, { status: 200 });
   } catch (error) {
     console.log(error);
     return NextResponse.json({ message: "Error", error }, { status: 500 });
@@ -29,7 +29,7 @@ export async function DELETE(req, { params }) {
   try {
     const { id } = params;
 
-    await Messages.findByIdAndDelete(id);
+    await Prompts.findByIdAndDelete(id);
     return NextResponse.json({ message: "Message Deleted" }, { status: 200 });
   } catch (error) {
     console.log(error);

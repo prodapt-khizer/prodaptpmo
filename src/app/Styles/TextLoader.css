@@ -1,0 +1,91 @@
+.loader {
+  position: relative;
+  margin: 40px;
+}
+.loader__dot {
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin: 4px;
+  border-radius: 5px;
+  background-color: #e1e3e7;
+  float: left;
+}
+.slide {
+  will-change: transform, opacity;
+  -webkit-animation: slide 400ms infinite linear;
+          animation: slide 400ms infinite linear;
+}
+.slide__one {
+  -webkit-animation: fadeIn 400ms infinite ease-out;
+          animation: fadeIn 400ms infinite ease-out;
+}
+.slide__two {
+  -webkit-animation: fadeOut 400ms infinite ease-in;
+          animation: fadeOut 400ms infinite ease-in;
+}
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  height: 100vh;
+  align-items: center;
+  background-color: #fff;
+}
+@-webkit-keyframes slide {
+  from {
+    transform: translateX(-18px);
+  }
+  to {
+    transform: translateX(0px);
+  }
+}
+@keyframes slide {
+  from {
+    transform: translateX(-18px);
+  }
+  to {
+    transform: translateX(0px);
+  }
+}
+@-webkit-keyframes fadeIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes fadeIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@-webkit-keyframes fadeOut {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+@keyframes fadeOut {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
