@@ -2,11 +2,11 @@
 
 "use client";
 import Sidebar from "@/app/(components)/Sidebar";
+import Login from "@/app/(components)/Login";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 
-export default function Home() {
+export default function Dashboard() {
   const router = useRouter();
   useEffect(()=>{
     if(!window.localStorage.getItem("user")){

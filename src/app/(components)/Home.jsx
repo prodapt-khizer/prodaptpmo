@@ -50,7 +50,9 @@ const Home = ({
       // setSuggestions(res.data.prompts);
       setAllSuggestions(res.data.prompts);
       setPromptLoaded(true);
-    });
+    }).catch((err)=>{
+      console.log("error ",err );
+    })
   };
   const filterAndSortData = (data) => {
     // Step 1: Group by prompt_category

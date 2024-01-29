@@ -7,6 +7,12 @@ export async function GET(request, { params }) {
     return NextResponse.json({ messages }, { status: 200 });
 }
 
+export async function POST(request, { params }) {
+  const { id } = params;
+    const messages = await Messages.find({ email: id });
+    return NextResponse.json({ messages }, { status: 200 });
+}
+
 export async function PUT(req, { params }) {
   try {
     const { id } = params;

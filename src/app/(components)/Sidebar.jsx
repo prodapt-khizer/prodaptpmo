@@ -110,7 +110,7 @@ const DualSidebar = () => {
     setSettingsActive(itemName === "settings");
   };
   const getMessages = () => {
-    axios.get("/api/messages",{
+    axios.post("/api/messages/"+localStorage.getItem("user"),{
       timeout: 5000
     }).then((res) => {
       setAllTitles(res.data.messages);
@@ -132,7 +132,7 @@ const DualSidebar = () => {
       title: "",
       prompt: [],
       response: [],
-      user: "Khizer Hussain",
+      user: localStorage.getItem("user"),
       edited: false,
     }).then((res)=>{
       setGenerating(true);
