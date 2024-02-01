@@ -90,7 +90,10 @@ const LoginPage = () => {
           ) : (
             <form action="#">
               <div className="field input-field">
-                <input type="email" placeholder="Email" className="input" onChange={(e)=> {setEmail(e.target.value);setName(e.target.value)}} />
+                <input type="text" placeholder="Name" className="input" onChange={(e)=> setName(e.target.value)} />
+              </div>
+              <div className="field input-field">
+                <input type="email" placeholder="Email" className="input" onChange={(e)=> setEmail(e.target.value)} />
               </div>
               <div className="field input-field">
                 <input

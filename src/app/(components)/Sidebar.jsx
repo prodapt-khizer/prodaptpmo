@@ -42,6 +42,7 @@ const DualSidebar = () => {
     }
 
     const uri = "ws://34.67.160.218:8765/";
+    // const uri = "ws://localhost:8765";
     const ws = new W3CWebSocket(uri);
 
     ws.onopen = () => {
@@ -68,19 +69,20 @@ const DualSidebar = () => {
   }, [websocket]);
   const getOneMessage = (data) => {
     axios
-    .get("/api/messages/" + encodeURIComponent(data),{
-      timeout: 50000
-    })
-    .then((res) => {
-      setMessages(res.data.messages);
-      setTitle(data);
-      getMessages();
-      setQn("");
-      setAns("");
-    })
-    .catch((error) => {
-      console.log("error ", error);
-    });
+      .get("/api/messages/" + encodeURIComponent(data), {
+        timeout: 50000,
+      })
+      .then((res) => {
+        setMessages(res.data.messages);
+        setTitle(data);
+        getMessages();
+        setQn("");
+        setAns("");
+        setTitle(res.data.messages[0].title);
+      })
+      .catch((error) => {
+        console.log("error ", error);
+      });
   };
   const sendMessage = (message) => {
     if (
@@ -88,7 +90,9 @@ const DualSidebar = () => {
       websocket.readyState === WebSocket.OPEN &&
       message[message.length - 1].trim() !== ""
     ) {
+      console.log("sending message ", message);
       websocket.send(message);
+
       if (message[message.length - 1].toLowerCase() === "quit") {
         websocket.close();
       }
@@ -101,21 +105,23 @@ const DualSidebar = () => {
   useEffect(() => {
     getMessages();
   }, []);
-  useEffect(()=>{
+  useEffect(() => {
     console.log(allTitles);
-  },[allTitles])
+  }, [allTitles]);
   const handleItemClick = (itemName) => {
     setHomeActive(itemName === "home");
     setCompassActive(itemName === "compass");
     setSettingsActive(itemName === "settings");
   };
   const getMessages = () => {
-    axios.post("/api/messages/"+localStorage.getItem("user"),{
-      timeout: 5000
-    }).then((res) => {
-      setAllTitles(res.data.messages);
-      setDataLoaded(true);
-    });
+    axios
+      .post("/api/messages/" + localStorage.getItem("user"), {
+        timeout: 5000,
+      })
+      .then((res) => {
+        setAllTitles(res.data.messages);
+        setDataLoaded(true);
+      });
   };
   const goToHome = () => {
     router.push("/");
@@ -127,29 +133,39 @@ const DualSidebar = () => {
   const handleSearchInitiation = () => {};
 
   const callOpenAi = (ti, data) => {
-    console.log(ti,"data ", data);
-    axios.post("api/messages", {
-      title: "",
-      prompt: [],
-      response: [],
-      user: localStorage.getItem("user"),
-      edited: false,
-    }).then((res)=>{
+    console.log(ti, "data ", data);
+    if (objectID === "") {
+      console.log("out obj ", objectID);
+      axios
+        .post("api/messages", {
+          title: "",
+          prompt: [],
+          response: [],
+          user: localStorage.getItem("user"),
+          edited: false,
+        })
+        .then((res) => {
+          setGenerating(true);
+          setQn(data);
+          setTitleText(ti);
+          sendMessage(res.data.response._id);
+          sendMessage(data);
+          setObjectID(res.data.response._id);
+        });
+    } else {
+      console.log("inside obj ", objectID);
       setGenerating(true);
       setQn(data);
-      setTitleText(ti);
-      sendMessage(res.data.response._id);
       sendMessage(data);
-      setObjectID(res.data.response._id)
-    })
-    
+    }
+
     // if (title === "") {
     // } else {
     //   sendMessage([...messages[0].prompt, data]);
     // }
   };
   useEffect(() => {
-    if(objectID !== ""){
+    if (objectID !== "") {
       getOneMessage(objectID);
     }
     if (qn != "" && ans != "") {
@@ -166,21 +182,24 @@ const DualSidebar = () => {
       //   // getMessages();
       //   setGenerating(false);
       // } else {
-        axios
-          .get("/api/messages/" + encodeURIComponent(objectID))
-          .then((res) => res.data.messages[0])
-          .then((res) => {
-            axios.put("/api/messages/" + res._id, {
+      axios
+        .get("/api/messages/" + encodeURIComponent(objectID))
+        .then((res) => res.data.messages[0])
+        .then((res) => {
+          axios
+            .put("/api/messages/" + res._id, {
               title: titleText || res.title,
               prompt: [...res.prompt, qn],
               response: [...res.response, ans],
-              user: "Khizer Hussain",
+              user: res.user,
               edited: false,
+            })
+            .then(() => {
+              getOneMessage(objectID);
+              setGenerating(false);
             });
-          });
-        getOneMessage(objectID);
-        // getMessages();
-        setGenerating(false);
+        });
+      // getMessages();
       // }
       // setMessages((prevData) => {
       //   const lastIndex = prevData.length > 1 ? prevData.length - 1 : 0;
@@ -219,6 +238,7 @@ const DualSidebar = () => {
     setTitle("");
     setTitleText("");
     sendMessage(["quit"]);
+    setObjectID("");
   };
   if (dataLoaded) {
     return (
@@ -356,7 +376,12 @@ const DualSidebar = () => {
                           <div key={i} className="chat-subcategory">
                             <div
                               className="chatbot-item"
-                              onClick={() => getOneMessage(data._id)}
+                              onClick={() => {
+                                sendMessage("quit");
+                                getOneMessage(data._id);
+                                setObjectID(data._id);
+                                sendMessage(data._id);
+                              }}
                             >
                               <FiBookmark size={18} />
                               <span>{data.title.substring(0, 30)}</span>

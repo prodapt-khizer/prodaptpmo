@@ -1,5 +1,5 @@
+import Prompts from "@/app/(models)/prompts";
 import { NextResponse } from "next/server";
-import Prompts from "../../../(models)/prompts";
 
 export async function GET(request, { params }) {
   const { id } = params;
@@ -13,12 +13,13 @@ export async function PUT(req, { params }) {
 
     const body = await req.json();
     const promptData = body;
+    console.log("coming");
 
     const updatePromptData = await Prompts.findByIdAndUpdate(id, {
       ...promptData,
     });
 
-    return NextResponse.json({ message: "Message updated", updatedPrompt: updatePromptData }, { status: 200 });
+    return NextResponse.json({ message: "Prompt updated", updatedPrompt: updatePromptData }, { status: 200 });
   } catch (error) {
     console.log(error);
     return NextResponse.json({ message: "Error", error }, { status: 500 });

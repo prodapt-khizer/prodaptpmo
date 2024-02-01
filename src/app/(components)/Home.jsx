@@ -103,7 +103,11 @@ const Home = ({
   };
   const updateCount = (data) => {
     axios.put("/api/prompts/" + data._id, {
-      hit_count: data.hit_count+1,
+      hit_count: data.hit_count+1
+    }).then((res)=>{
+      console.log(res);
+    }).catch((err)=>{
+      console.log("error ",err);
     });
   };
   const getRandomValuesForCategory = (category) => {
@@ -183,9 +187,9 @@ const Home = ({
         {messages?.length > 0 || searching ? (
           <div className="chat_data">
             {/* <HomeSearch isLeftSidebarCollapsed={isLeftSidebarCollapsed} /> */}
-            {messages.map((data) => {
+            {messages.map((data,j) => {
               return (
-                <div className="chat_set">
+                <div className="chat_set" key={j}>
                   {data.prompt.map((res, i) => {
                     return (
                       <>

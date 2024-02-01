@@ -9,7 +9,7 @@ export async function GET(request, { params }) {
 
 export async function POST(request, { params }) {
   const { id } = params;
-    const messages = await Messages.find({ email: id });
+    const messages = await Messages.find({ user: id });
     return NextResponse.json({ messages }, { status: 200 });
 }
 

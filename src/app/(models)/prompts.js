@@ -12,6 +12,6 @@ const promptschema = new Schema(
   }
 );
 
-const Prompts = mongoose.models.prompt || mongoose.model("prompts", promptschema);
+const Prompts = mongoose.models.prompts || mongoose.model("prompts", promptschema);
 
 export default Prompts;
