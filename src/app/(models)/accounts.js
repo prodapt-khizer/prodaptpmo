@@ -1,3 +1,4 @@
+
 import mongoose, { Schema } from "mongoose";
 
 mongoose.connect(process.env.MONGODB_URI, {
@@ -7,17 +8,13 @@ mongoose.connect(process.env.MONGODB_URI, {
 });
 mongoose.Promise = global.Promise;
 
-const usersschema = new Schema(
+const accountsschema = new Schema(
   {
-    email:String,
-    password:String,
-    name: String
-  },
-  {
-    timestamps: true,
+    _id:Number,
+    name:String,
   }
 );
 
-const Users = mongoose.models.users || mongoose.model("users", usersschema);
+const Accounts = mongoose.models.accounts || mongoose.model("accounts", accountsschema);
 
-export default Users;
+export default Accounts;

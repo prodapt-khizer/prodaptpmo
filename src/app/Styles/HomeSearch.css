@@ -32,7 +32,6 @@ Deal container */
  
 .deal-container{
     background-color:  #F3F4F8;
-    overflow: auto;
 }
 .deal-header{
     color: #333;
@@ -148,7 +147,6 @@ line-height: normal;
   .deal-table{
    height: 200px;
    width:100%;
-  overflow: auto;
   }
  
   .bottom-table::-webkit-scrollbar-track,

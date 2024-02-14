@@ -1,4 +1,11 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+const nextConfig = {
+  trailingSlash: true,
+  async generateStaticParams() {
+    return {
+      "/": { page: "/" },
+    };
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

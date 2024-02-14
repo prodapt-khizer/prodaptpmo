@@ -159,3 +159,18 @@
 .comment-form_btn {
   @apply rounded-3xl bg-primary-500 px-8 py-2 !text-small-regular text-light-1 max-xs:w-full !important;
 }
+.main_container{
+  width: 100dvw;
+  height: 100dvh;
+  display: flex;
+}
+.separator-line {
+  width: 1px;
+  background-color: #aaa;
+  transition: left 0.3s ease;
+  height: calc(100vh);
+}
+.dashboard_container{
+  padding: 20px;
+}
+

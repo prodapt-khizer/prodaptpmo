@@ -19,11 +19,11 @@ const DealSheet = ({ isLeftSidebarCollapsed }) => {
       >
         <div className="chat-header">
           <div className="circle-letter">L</div>
-          <p>Provide a brief summary of the project's objectives and scope.</p>
+          <p>{`Provide a brief summary of the project's objectives and scope.`}</p>
         </div>
         <div className="deal-container">
           <div>
-            <div className="deal-header">Project's objectives and scope.</div>
+            <div className="deal-header">{`Project's objectives and scope.`}</div>
             <div style={{ display: "flex" }}>
               <div className="costing">
                 <div className="costing-header">Costing - FTE</div>

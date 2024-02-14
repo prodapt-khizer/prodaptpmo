@@ -13,11 +13,11 @@ const LoginPage = () => {
   const [pwd, setPwd] = useState("");
 
   const [token, setToken] = useState();
-
+  const router = useRouter();
+  
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
-  const router = useRouter();
   useEffect(()=>{
     if(window.localStorage.getItem("user")){
       router.push('/');
@@ -28,9 +28,10 @@ const LoginPage = () => {
       email: userName,
       password: password
     }).then((res)=>{
+      setToken(res.data.token);
+      localStorage.setItem("user-token", res.data.token);
      return jwt.decode(res.data.token)
     }).then((res)=>{
-      setToken(res.userID);
       localStorage.setItem("user", res.userID);
     })
   }
@@ -121,7 +122,7 @@ const LoginPage = () => {
           )}
           <div className="form-link">
             <span>
-              Don't have an account?{" "}
+              {`Don't have an account? `}
               <span
                 className="link signup-link"
                 onClick={() =>

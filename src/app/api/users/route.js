@@ -44,7 +44,7 @@ export async function PUT(req) {
             await doc.save();
             const saved_user = await Users.findOne({ email: email });
             const token = jwt.sign(
-              { userID: saved_user.email },
+              { userID: saved_user.email, name: saved_user.name },
               "prodaptpmotoolkey"
             );
             return NextResponse.json({
@@ -89,7 +89,7 @@ export async function POST(req, res) {
         if (user.email === email && isMatch) {
           // Generate JWT Token
           const token = jwt.sign(
-            { userID: user.email },
+            { userID: user.email, name: user.name },
             "prodaptpmotoolkey"
           );
          return NextResponse.json({

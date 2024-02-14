@@ -5,7 +5,11 @@ const option = {};
 
 if (!uri) throw new Error("Please add MongoDB URI to your local env");
 
-let clientPromise = mongoose.connect(uri);
+let clientPromise = mongoose.connect(uri, {
+    bufferCommands: false, // Disable command buffering
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
 
 export default clientPromise
 

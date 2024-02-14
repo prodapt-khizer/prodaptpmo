@@ -11,11 +11,8 @@ export default function Home() {
   useEffect(()=>{
     if(!window.localStorage.getItem("user")){
       router.push('/login');
+    } else {
+      router.push('/dashboard');
     }
   },[])
-  return (
-    <main>
-      <Sidebar />
-    </main>
-  );
 }
