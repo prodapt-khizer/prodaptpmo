@@ -1,0 +1,178 @@
+import asyncio
+import websockets
+import openai  # Import the OpenAI library
+import os
+import langchain
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings import GPT4AllEmbeddings
+from langchain.vectorstores import Chroma
+from langchain.document_loaders import PyPDFLoader
+from langchain.llms import Replicate
+from langchain.chains import ConversationalRetrievalChain
+import sqlite3
+from datetime import datetime
+import json
+from langchain_community.document_loaders import GCSFileLoader
+from langchain.text_splitter import CharacterTextSplitter
+from google.cloud.storage import Client
+from PyPDF2 import PdfReader
+import io
+
+with open ('config.json') as file:
+    config=json.load(file)
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = config['GOOGLE_APPLICATION_CREDENTIALS']
+
+client = Client()
+bucket = client.get_bucket(config['bucket'])
+blob = bucket.get_blob(config['blob'])
+content = blob.download_as_string()
+pdf_stream = io.BytesIO(content)
+pdfreader = PdfReader(pdf_stream)
+
+raw_text = ""
+for i, page in enumerate(pdfreader.pages):
+    content = page.extract_text()
+    if content:
+        raw_text += content
+
+text_splitter = CharacterTextSplitter(
+    separator="\n",
+    chunk_size=800,
+    chunk_overlap=200,
+    length_function=len,
+)
+ 
+texts = text_splitter.split_text(raw_text)
+
+vectorstore = Chroma.from_texts(texts, embedding=GPT4AllEmbeddings())
+
+os.environ['REPLICATE_API_TOKEN'] = config['api']['replicate']
+
+openai.api_key = config['api']['openai']
+
+llm = Replicate(
+    model="a16z-infra/llama13b-v2-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5",
+    input={"temperature": 0.75, "max_length": 3000}
+)
+
+qa_chain = ConversationalRetrievalChain.from_llm(
+    llm,
+    vectorstore.as_retriever(search_kwargs={'k': 2}),
+    return_source_documents=True
+)
+
+conn = sqlite3.connect('conversation.db')
+
+# Create a cursor object to interact with the database
+cursor = conn.cursor()
+
+# Create a table for storing conversation data if it doesn't exist
+cursor.execute('''CREATE TABLE IF NOT EXISTS conversation (
+                    id INTEGER PRIMARY KEY,
+                    session_id TEST,
+                    datetime TIMESTAMP,
+                    role TEXT,
+                    content TEXT,
+                    question TEXT,
+                    answer TEXT
+                )''')
+
+item={"role": "system", "content": "You are a helpful assistant."}
+
+async def handle_client(websocket, path):
+    cursor = conn.cursor()
+    session_id = await websocket.recv()    
+    print(f"Received session ID: {session_id}")
+    while True:
+        # session_id=int(session_id)
+        cursor.execute("SELECT role, content FROM conversation WHERE session_id = ? AND role IS NOT NULL AND content IS NOT NULL ORDER BY datetime ASC", (session_id,))
+        rows = cursor.fetchall()
+        if rows:
+            # If session_id exists, retrieve the data
+            print(f"Session ID {session_id} exists. Retrieving data:")
+        # Display the retrieved data
+            messages = [{ 'role': row[0], 'content': row[1]} for row in rows]
+            break
+        else:
+            # cursor.execute("INSERT INTO conversation (session_id, datetime, role, content) VALUES (?, ?, ?, ?)",
+            #                 session_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), item['role'], item['content'])            
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            cursor.execute("INSERT INTO conversation (session_id, datetime, role, content,question,answer) VALUES (?, ?, ?, ?, ?, ?)",
+                        (session_id, current_time, item['role'], item['content'],None,None))
+
+            # Commit changes to the database
+            conn.commit()
+            print("New data inserted.")
+    print('---Fetched data---')
+    print("Client connected")
+    # messages = [{"role": "system", "content": "You are a helpful assistant."}]
+    cursor.execute("SELECT question,answer FROM conversation WHERE session_id = ? AND question IS NOT NULL AND answer IS NULL ORDER BY datetime ASC",(session_id,))
+    chat_history = cursor.fetchall()
+    # chat_history = []
+    print('------Chat History Fetched-------')
+
+    async for message in websocket:
+        print(f"Received message from client: {message}")
+        
+        # Handle received message from the client
+        if message.lower() == "quit":
+            break
+        
+        results = vectorstore.similarity_search_with_score(message)
+        # print(results)
+        # Find the document with the maximum score
+        max_score = -1.0
+        max_document_id = -1
+        for document_id, score in results:
+            if (score > max_score) and (score<=1):
+                max_score = score
+                max_document_id = document_id
+        # Pass the message to the chatbot function
+        print(max_score)
+        if max_score ==-1.0 or max_score>1.0:
+            messages.append({"role": "user", "content": message})
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            cursor.execute("INSERT INTO conversation (session_id, datetime, role, content,question,answer) VALUES (?, ?, ?, ?, ?, ?)",
+                    (session_id, current_time, 'user', message, None,None))
+
+            # Commit changes to the database
+            conn.commit()
+            response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages)
+            chat_message = response['choices'][0]['message']['content']
+            print(f"GPT: {chat_message}")
+            messages.append({"role": "assistant", "content": chat_message})
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            cursor.execute("INSERT INTO conversation (session_id, datetime, role, content,question,answer) VALUES (?, ?, ?, ?, ?, ?)",
+                    (session_id, current_time, 'assistant', chat_message,None,None))
+
+            # Commit changes to the database
+            conn.commit()
+            response=chat_message
+            print('---gpt---')
+        else:
+            result = qa_chain({'question': message, 'chat_history': chat_history})
+            print('GPT:' + result['answer'])
+            chat_history.append((message, result['answer']))
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            cursor.execute("INSERT INTO conversation (session_id, datetime, role, content,question,answer) VALUES (?, ?, ?, ?, ?, ?)",
+                    (session_id, current_time,None, None,message,result['answer']))
+
+            # Commit changes to the database
+            conn.commit()
+            response=result['answer']
+            print('---llama---')
+        # response = chatbot(messages, chat_history, message)
+        print(f"Sending response to client: {response}")
+
+        # Send a response back to the client
+        await websocket.send(response)
+
+if __name__ == "__main__":
+    start_server = websockets.serve(handle_client, "0.0.0.0", 8765,ping_interval=None)
+    print("WebSocket server started. Listening on localhost:8765")
+    asyncio.get_event_loop().run_until_complete(start_server)
+    asyncio.get_event_loop().run_forever()
+

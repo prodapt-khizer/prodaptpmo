@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pmo-chatbot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pmo-chatbot
+  template:
+    metadata:
+      labels:
+        app: pmo-chatbot
+    spec:
+      containers:
+      - name: pmo-chatbot
+        image: gcr.io/lumen-b-ctl-047/pmo-chatbot:8.0
+        ports:
+        - containerPort: 8765

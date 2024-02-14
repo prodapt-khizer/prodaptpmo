@@ -1,0 +1,11 @@
+{
+    "api" :
+    {
+        "replicate":"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",
+        "openai":"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"
+    },
+    "GOOGLE_APPLICATION_CREDENTIALS" : "lumen-b-ctl-047-5976514b2448.json",
+    "bucket" : "techassist-chatbot",
+    "blob" : "prodapt.pdf",
+    "project_id":"lumen-b-ctl-047"
+}
