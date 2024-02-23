@@ -84,6 +84,11 @@ form{
     font-weight: 400;
     color: #232836;
 }
+.error{
+color: red;
+margin-top: 10px;
+margin-left: 4px;
+}
 .link{
     color: #0171d3 !important;
     text-decoration: none;

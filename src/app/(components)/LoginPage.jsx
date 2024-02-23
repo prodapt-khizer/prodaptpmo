@@ -11,7 +11,10 @@ const LoginPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
-
+  const [loginFailed,setLoginFailed] = useState(false);
+  const [loginMessage,setLoginMessage] = useState("");
+  const [signupFailed,setSignUpFailed] = useState(false);
+  const [signupMessage,setSignUpMessage] = useState("");
   const [token, setToken] = useState();
   const router = useRouter();
   
@@ -28,12 +31,20 @@ const LoginPage = () => {
       email: userName,
       password: password
     }).then((res)=>{
+      if (res.data.status === "success"){
+      
       setToken(res.data.token);
       localStorage.setItem("user-token", res.data.token);
-     return jwt.decode(res.data.token)
-    }).then((res)=>{
-      localStorage.setItem("user", res.userID);
+      const  userData=jwt.decode(res.data.token);
+      localStorage.setItem("user",userData)
+      setLoginFailed(false)
+      }
+      else{
+        setLoginFailed(true)
+        setLoginMessage(res.data.message);
+      } 
     })
+  
   }
   const handleSignup = () =>{
     axios.put('/api/users',{
@@ -42,10 +53,19 @@ const LoginPage = () => {
       password: pwd,
       password_confirmation: pwd
     }).then((res)=>{
-     return jwt.decode(res?.data?.token)
-    }).then((res)=>{
-      setToken(res?.userID);
-      localStorage.setItem("user", res?.userID);
+      if (res.data.status === "success"){
+      setToken(res.data.token);
+      localStorage.setItem("user-token", res.data.token);
+      const  userData=jwt.decode(res.data.token);
+      localStorage.setItem("user",userData)
+      setSignUpFailed(false)
+      }
+      else{
+      
+        setSignUpFailed(true)
+        setSignUpMessage(res.data.message);
+        
+      } 
     })
   }
   return (
@@ -72,11 +92,15 @@ const LoginPage = () => {
                 />
                 <i className="bx bx-hide eye-icon"></i>
               </div>
+               {
+                loginFailed && <p className="error">{loginMessage}</p>
+              }
               <div className="form-link">
                 <a href="#" className="forgot-pass">
                   Forgot password?
                 </a>
               </div>
+             
               <div className="field button-field">
                 <button
                   onClick={(e) => {
@@ -112,6 +136,9 @@ const LoginPage = () => {
                 />
                 <i className="bx bx-hide eye-icon"></i>
               </div>
+              {
+                signupFailed && <p className="error">{signupMessage}</p>
+              }
               <div className="field button-field">
                 <button onClick={(e)=>{
                   e.preventDefault();
