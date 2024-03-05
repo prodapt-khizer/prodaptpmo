@@ -1,4 +1,4 @@
-import Prompts from "@/app/(models)/prompts";
+import Prompts from "../../../(models)/prompts";
 import { NextResponse } from "next/server";
 
 export async function GET(request, { params }) {

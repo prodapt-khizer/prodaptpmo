@@ -1,15 +1,15 @@
 // Assuming you're using 'websocket' library, make sure to install it with `npm install websocket` if you haven't already
 
 "use client";
-import Sidebar from "@/app/(components)/Sidebar";
+import Sidebar from "../../(components)/Sidebar";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import { CiMicrophoneOn } from "react-icons/ci";
-import Loader from "@/app/(components)/Loader";
-import Home from "@/app/(components)/Home";
-import DashboardMain from "@/app/(components)/DashboardMain";
+import Loader from "../../(components)/Loader";
+import Home from "../../(components)/Home";
+import DashboardMain from "../../(components)/DashboardMain";
 import { VscSend } from "react-icons/vsc";
 
 export default function Dashboard() {
@@ -30,6 +30,7 @@ export default function Dashboard() {
   const [isRecording, setIsRecording] = useState(false);
   const [linecount, setLineCount] = useState(1);
   const [searchText, setSearchText] = useState("");
+  const [searchTitle, setSearchTitle] = useState("");
   const [homeSearch, setHomeSearch] = useState(false);
   const [tempResponse, setTempResponse] = useState([]);
   const [tempQuestion, setTempQuestion] = useState([]);
@@ -95,6 +96,7 @@ export default function Dashboard() {
         setTempResponse(
           data.response.map((temp) => ({ question: temp, answer: "" }))
         );
+        console.log(data.response)
         setAns({ response_type: "message", response: data.response[0] });
       } else {
         setAns(data);
@@ -180,6 +182,7 @@ export default function Dashboard() {
   const handleSearchInitiation = () => {};
 
   const callOpenAi = (ti, data) => {
+    console.log(ti, data);
     if (responseType === "Json-Questions") {
       setQn(ti);
       sendMessage(JSON.stringify(data));
@@ -229,7 +232,7 @@ export default function Dashboard() {
         console.log("inside obj ", tempResponse, isQuestionCompleted);
         setGenerating(true);
         setQn(data);
-        sendMessage((tempResponse && JSON.stringify(tempResponse)) || data);
+        sendMessage((tempResponse && tempResponse.length != 0 && JSON.stringify(tempResponse)) || data);
       }
     }
   };
@@ -336,6 +339,10 @@ export default function Dashboard() {
             getOneMessage={getOneMessage}
             sendMessage={sendMessage}
             setIsChatActive={setIsChatActive}
+            searchText={searchText}
+            setSearchText={setSearchText}
+            searchTitle={searchTitle}
+            setSearchTitle={setSearchTitle}
           />
         )}
 

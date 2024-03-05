@@ -1,12 +1,10 @@
 // DualSidebar.js
 "use client";
-import React, { useEffect, useState } from "react";
-import { BsChevronBarDown, BsChevronCompactDown, BsChevronDown, BsChevronLeft, BsChevronRight } from "react-icons/bs";
-import { RiHome6Fill, RiSettings3Line } from "react-icons/ri";
-import { LuCompass } from "react-icons/lu";
+import React, {  useEffect, useState } from "react";
+import {BsChevronDown, BsChevronLeft, BsChevronRight } from "react-icons/bs";
+
 import "../Styles/Sidebar.css";
 import "../Styles/Home.css";
-import chatData from "../../Data/chatData.json";
 import Logo from "./Logo";
 import homeFill from "../Assets/Home-svg/dashboard_icon.svg";
 import home from "../Assets/Home-svg/dashboard_black_icon.svg";
@@ -19,24 +17,31 @@ import { FaPlus } from "react-icons/fa";
 
 
 
-import HomeSearch from "./HomeSearch";
-import Loader from "@/app/(components)/Loader";
 import { useRouter } from "next/navigation";
 import jwt from "jsonwebtoken";
 
 const Sidebar = (props) => {
   const [isLeftSidebarCollapsed, setLeftSidebarCollapsed] = useState(true);
   const router = useRouter();
-  const [user, setUser] = useState(
-    jwt.decode(localStorage.getItem("user-token"))
-  );
+  const [user, setUser] = useState(null);
   const [isHomeActive, setHomeActive] = useState(props.currentTab === 'home');
   const [isProjectActive, setProjectActive] = useState(props.currentTab === 'projects');
   const [isSettingsActive, setSettingsActive] = useState(props.currentTab === 'settings');
   const [isNewActive, setIsNewActive] = useState(props.currentTab === 'new');
-
+  useEffect(() => {
+    // Check if localStorage is available before using it
+    if (typeof window !== 'undefined' && window.localStorage) {
+      // Access localStorage here
+      setUser(jwt.decode(localStorage.getItem("user-token")));
+      
+    } else {
+      // Handle the absence of localStorage gracefully
+      // console.warn('localStorage is not available in this environment.');
+    }
+  }, []); 
   const getNameImg = (name) => {
     // Split the name into an array of words
+    if(name){
     const words = name.split(" ");
     // Capitalize the first letter of the first word
     const firstName = words[0].charAt(0).toUpperCase();
@@ -49,8 +54,11 @@ const Sidebar = (props) => {
     const result = `${firstName} ${lastName}`;
 
     return result;
+  }
+  return null
   };
 
+  
   const toggleLeftSidebar = () => {
     setLeftSidebarCollapsed(!isLeftSidebarCollapsed);
   };
@@ -170,12 +178,12 @@ const Sidebar = (props) => {
       <div className="sidebar_bottom">
         <div className="user">
           {user?.profile ? (
-            <img src={user.profile} alt="user" />
+            <img src={user?.profile} alt="user" />
           ) : (
-            <div className="profile_pic">{getNameImg(user.name)}</div>
+            <div className="profile_pic">{getNameImg(user?.name)}</div>
           )}
           {!isLeftSidebarCollapsed && (
-            <div className="user_name">{user.name} <span className="logout_container" style={{margin: '0 5px', cursor: 'pointer', position: 'relative'}}><BsChevronDown size={16} /> <div className="logout" >Sign Out</div></span></div>
+            <div className="user_name">{user?.name} <span className="logout_container" style={{margin: '0 5px', cursor: 'pointer', position: 'relative'}}><BsChevronDown size={16} /> <div className="logout" >Sign Out</div></span></div>
           )}
         </div>
           <div className="toggle-btn-container" onClick={toggleLeftSidebar}>

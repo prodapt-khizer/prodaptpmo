@@ -1,5 +1,5 @@
 import React from "react";
-import "@/app/Styles/TextLoader.css";
+import "../Styles/TextLoader.css";
 const TextLoader = () => {
   return (
     <div className="loader slide">

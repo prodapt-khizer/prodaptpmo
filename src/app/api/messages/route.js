@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import Messages from "@/app/(models)/messages";
+import Messages  from "../../(models)/messages";
 
 export async function GET() {
   try {

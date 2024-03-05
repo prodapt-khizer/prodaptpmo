@@ -30,9 +30,7 @@ const LoginPage = () => {
     }).then((res)=>{
       setToken(res.data.token);
       localStorage.setItem("user-token", res.data.token);
-     return jwt.decode(res.data.token)
-    }).then((res)=>{
-      localStorage.setItem("user", res.userID);
+      localStorage.setItem("user",jwt.decode(res.data.token).userID)
     })
   }
   const handleSignup = () =>{
@@ -42,10 +40,9 @@ const LoginPage = () => {
       password: pwd,
       password_confirmation: pwd
     }).then((res)=>{
-     return jwt.decode(res?.data?.token)
-    }).then((res)=>{
-      setToken(res?.userID);
-      localStorage.setItem("user", res?.userID);
+      setToken(res.data.token);
+      localStorage.setItem("user-token", res.data.token);
+      localStorage.setItem("user",jwt.decode(res.data.token).userID)
     })
   }
   return (

@@ -1,4 +1,4 @@
-import Movies from "@/app/(models)/movies";
+import Movies from "../../(models)/movies";
 import { NextResponse } from "next/server";
 
 export async function GET() {

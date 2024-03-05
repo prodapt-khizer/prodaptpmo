@@ -16,11 +16,11 @@ import manage from "../Assets/Home-svg/Management.svg";
 
 import support from "../Assets/Home-svg/Support.svg";
 import Image from "next/image";
-import OpenAIResponse from "@/app/(components)/openAiResponse";
-import JsonTable from "@/app/(components)/JsonTable";
+import OpenAIResponse from "./openAIResponse";
+import JsonTable from "./JsonTable";
 import axios from "axios";
-import TextLoader from "@/app/(components)/TextLoader";
-import FormComponent from "@/app/(components)/forms/FormComponent";
+import TextLoader from "./TextLoader";
+import FormComponent from "./forms/FormComponent";
 import Loader from "./Loader";
 
 const Home = ({
@@ -41,10 +41,14 @@ const Home = ({
   getOneMessage,
   sendMessage,
   setIsChatActive,
+  searchText,
+  setSearchText,
+  searchTitle,
+  setSearchTitle
 }) => {
   const [searched, setSearched] = useState(false);
-  const [searchText, setSearchText] = useState("");
-  const [searchTitle, setSearchTitle] = useState("");
+  // const [searchText, setSearchText] = useState("");
+  // const [searchTitle, setSearchTitle] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [allSuggestions, setAllSuggestions] = useState([]);
   const [linecount, setLineCount] = useState(1);
@@ -225,7 +229,6 @@ const Home = ({
   const handleSearch = () => {
     submitPrompt(searchTitle, searchText);
     setSearchTextTemp(searchText);
-
     setSearchText("");
   };
   const icons = [
