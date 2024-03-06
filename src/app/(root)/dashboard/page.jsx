@@ -65,8 +65,8 @@ export default function Dashboard() {
       return;
     }
 
-    // const uri = "ws://34.67.160.218:8765/";
-    const uri = "ws://localhost:8655";
+    const uri = "ws://34.67.160.218:8655/";
+    // const uri = "ws://localhost:8655";
     const ws = new W3CWebSocket(uri);
 
     ws.onopen = () => {
@@ -136,8 +136,9 @@ export default function Dashboard() {
     setResponseType(isQuestionCompleted.length === 0 && "answer");
   }, [isQuestionCompleted]);
   const getOneMessage = (data) => {
+    console.log("after error, ",data);
     axios
-      .get("/api/messages/" + encodeURIComponent(data), {
+      .get("/api/messages/" + data, {
         timeout: 50000,
       })
       .then((res) => {
@@ -262,8 +263,9 @@ export default function Dashboard() {
             });
         })
         .catch(() => {
+          console.log("error coming");
           axios
-            .post("api/messages", {
+            .post("/api/messages", {
               _id: objectID,
               title: titleText,
               prompt: [qn],
@@ -274,7 +276,9 @@ export default function Dashboard() {
             .then((res) => {
               getOneMessage(objectID);
               setGenerating(false);
-            });
+            }).catch((e)=>{
+              console.log("error creating ", e);
+            })
         });
     }
   }, [ans]);
