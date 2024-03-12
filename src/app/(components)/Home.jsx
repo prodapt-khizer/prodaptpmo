@@ -309,8 +309,7 @@ const Home = ({
                             if (objectID != data._id) {
                               getOneMessage(data._id);
                               setObjectID(data._id);
-                              sendMessage("quit");
-                              sendMessage(data._id);
+                              sendMessage("quit&"+data._id);
                             }
                           }}
                         >
@@ -368,7 +367,7 @@ const Home = ({
                             <div className="response_table">
                               <JsonTable
                                 jsonData={
-                                  data.response[i]?.response?.task_details
+                                  data.response[i]?.response
                                 }
                               />
                             </div>

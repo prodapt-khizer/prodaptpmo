@@ -292,7 +292,7 @@ export default function Dashboard() {
     setMessages([]);
     setTitle("");
     setTitleText("");
-    sendMessage(["quit"]);
+    sendMessage("quit");
     setObjectID("");
   };
   useEffect(() => {
