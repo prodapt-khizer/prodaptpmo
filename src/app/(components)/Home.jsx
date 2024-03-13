@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../Styles/Home.css";
 import { VscSend } from "react-icons/vsc";
 import { CiMicrophoneOn } from "react-icons/ci";
@@ -44,7 +44,7 @@ const Home = ({
   searchText,
   setSearchText,
   searchTitle,
-  setSearchTitle
+  setSearchTitle,
 }) => {
   const [searched, setSearched] = useState(false);
   // const [searchText, setSearchText] = useState("");
@@ -55,16 +55,35 @@ const Home = ({
   const [promptLoaded, setPromptLoaded] = useState(false);
   const [recognition, setRecognition] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [enterFirstValue, setEnterFirstValue] = useState(null);
 
+  const textareaRef = useRef(null);
   useEffect(() => {
     getPrompts();
   }, []);
-  const calculateRows = () => {
-    const textarea = document.getElementById("searchTextArea"); // use the actual id of your textarea
-    const lineHeight = 30; // Adjust this value based on your textarea's line-height
-    const rows = Math.floor(textarea.scrollHeight / lineHeight);
-
-    setLineCount(Math.min(rows, 10));
+  const calculateRows = (text) => {
+    const { scrollHeight, clientHeight } = textareaRef.current;
+    setLineCount(scrollHeight > clientHeight ? `${scrollHeight}px` : "40px");
+    console.log(scrollHeight, clientHeight);
+    // if (textareaRef.current) {
+    //   const { scrollWidth } = textareaRef.current;
+    //   const charsPerLine = Math.floor(scrollWidth / 10);
+    //   const wrappedLines = Math.ceil(text?.length / charsPerLine);
+    //   const rows = Math.max(text?.split("\n").length, 1);
+    //   console.log(rows);
+    //   if (rows !== 0) {
+    //     setLineCount(
+    //       text?.trim()?.length === 0 || !rows ? 1 : Math.min(rows, 10)
+    //     );
+    //   } else {
+    //     setLineCount(
+    //       text?.trim()?.length === 0 || !wrappedLines
+    //         ? 1
+    //         : Math.min(wrappedLines, 10)
+    //     );
+    //   }
+    //   console.log("textarea", charsPerLine, text?.length, wrappedLines);
+    // }
   };
   const getPrompts = () => {
     // setLoading(false);
@@ -99,9 +118,10 @@ const Home = ({
             ],
             user: res.user,
             edited: false,
-          }).then(()=>{
-            submitPrompt("Creating the task.....", data);
           })
+          .then(() => {
+            submitPrompt("Creating the task.....", data);
+          });
       });
   };
 
@@ -150,7 +170,7 @@ const Home = ({
     return formattedData;
   };
   useEffect(() => {
-    calculateRows();
+    calculateRows(searchText);
   }, [searchText]);
   const getRandomCategories = () => {
     // Get unique categories
@@ -226,10 +246,19 @@ const Home = ({
     },
   ];
 
-  const handleSearch = () => {
+  const handleSearch = (check) => {
+    // if (enterFirstValue === searchText?.trim() || check === "btn") {
+    //   if (searchText?.trim()) {
     submitPrompt(searchTitle, searchText);
-    setSearchTextTemp(searchText);
+    // }
+    setSearchTextTemp(searchText ? searchText : "");
     setSearchText("");
+    setEnterFirstValue(null);
+    // setLineCount(1);
+    // } else {
+    //   // setLineCount(linecount + 1);
+    //   setEnterFirstValue(searchText?.trim());
+    // }
   };
   const icons = [
     <Image src={deal} key="icon1" alt="icon" className="home-icon" />,
@@ -309,7 +338,7 @@ const Home = ({
                             if (objectID != data._id) {
                               getOneMessage(data._id);
                               setObjectID(data._id);
-                              sendMessage("quit&"+data._id);
+                              sendMessage("quit&" + data._id);
                             }
                           }}
                         >
@@ -366,9 +395,7 @@ const Home = ({
                           ) : data.response[i].response_type === "table" ? (
                             <div className="response_table">
                               <JsonTable
-                                jsonData={
-                                  data.response[i]?.response
-                                }
+                                jsonData={data.response[i]?.response}
                               />
                             </div>
                           ) : data.response[i].response_type ===
@@ -476,7 +503,7 @@ const Home = ({
               </div>
             </>
           )}
-
+          {/* {linecount} */}
           {/* Search bar */}
           <div className="container-search-bar">
             {searchText && suggestions.length > 0 && (
@@ -529,7 +556,8 @@ const Home = ({
 
             <textarea
               placeholder="Enter Message"
-              rows={linecount}
+              // rows={linecount}
+              ref={textareaRef}
               id="searchTextArea"
               onChange={(e) => {
                 setSearchText(e.target.value);
@@ -545,14 +573,18 @@ const Home = ({
               value={searchText}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               style={{
-                height: "10%",
+                height: linecount,
+                maxHeight: "160px",
                 fontSize: "16px",
                 width: "95%",
-                height: "100%",
                 overflowY: "auto",
+                resize: "none",
               }}
             />
-            <div className="container-search-icon" onClick={handleSearch}>
+            <div
+              className="container-search-icon"
+              onClick={() => handleSearch("btn")}
+            >
               <VscSend size={18} />
             </div>
             <CiMicrophoneOn

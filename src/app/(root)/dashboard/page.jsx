@@ -90,13 +90,13 @@ export default function Dashboard() {
       //       setAns(data);
       //     });
       // } else
-       if (data.response_type === "question") {
+      if (data.response_type === "question") {
         setIsQnAvailable(true);
         setIsQuestionCompleted(data.response_type !== "question");
         setTempResponse(
           data.response.map((temp) => ({ question: temp, answer: "" }))
         );
-        console.log(data.response)
+        console.log(data.response);
         setAns({ response_type: "message", response: data.response[0] });
       } else {
         setAns(data);
@@ -136,7 +136,7 @@ export default function Dashboard() {
     setResponseType(isQuestionCompleted.length === 0 && "answer");
   }, [isQuestionCompleted]);
   const getOneMessage = (data) => {
-    console.log("after error, ",data);
+    console.log("after error, ", data);
     axios
       .get("/api/messages/" + data, {
         timeout: 50000,
@@ -157,12 +157,12 @@ export default function Dashboard() {
     if (
       websocket &&
       websocket.readyState === WebSocket.OPEN &&
-      message[message.length - 1].trim() !== ""
+      message[message.length - 1]?.trim() !== ""
     ) {
       console.log("sending message ", message);
       websocket.send(message);
 
-      if (message[message.length - 1].toLowerCase() === "quit") {
+      if (message[message.length - 1]?.toLowerCase() === "quit") {
         websocket.close();
       }
     }
@@ -233,7 +233,12 @@ export default function Dashboard() {
         console.log("inside obj ", tempResponse, isQuestionCompleted);
         setGenerating(true);
         setQn(data);
-        sendMessage((tempResponse && tempResponse.length != 0 && JSON.stringify(tempResponse)) || data);
+        sendMessage(
+          (tempResponse &&
+            tempResponse.length != 0 &&
+            JSON.stringify(tempResponse)) ||
+            data
+        );
       }
     }
   };
@@ -276,9 +281,10 @@ export default function Dashboard() {
             .then((res) => {
               getOneMessage(objectID);
               setGenerating(false);
-            }).catch((e)=>{
-              console.log("error creating ", e);
             })
+            .catch((e) => {
+              console.log("error creating ", e);
+            });
         });
     }
   }, [ans]);
