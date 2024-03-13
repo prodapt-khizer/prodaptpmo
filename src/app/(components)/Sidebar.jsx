@@ -183,7 +183,10 @@ const Sidebar = (props) => {
             <div className="profile_pic">{getNameImg(user?.name)}</div>
           )}
           {!isLeftSidebarCollapsed && (
-            <div className="user_name">{user?.name} <span className="logout_container" style={{margin: '0 5px', cursor: 'pointer', position: 'relative'}}><BsChevronDown size={16} /> <div className="logout" >Sign Out</div></span></div>
+            <div className="user_name">{user?.name} <span className="logout_container" style={{margin: '0 5px', cursor: 'pointer', position: 'relative'}}><BsChevronDown size={16} /> <div className="logout" onClick={()=>{
+              localStorage.clear();
+              router.push('/login')
+            }} >Sign Out</div></span></div>
           )}
         </div>
           <div className="toggle-btn-container" onClick={toggleLeftSidebar}>
